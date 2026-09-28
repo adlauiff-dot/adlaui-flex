@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07070b">
+<title>Adlaui Flex — Streaming</title>
+<style>
+:root{
+  --bg:#06070b;--panel:#0d0f16;--panel2:#141722;--text:#fff;--muted:#a7adbd;
+  --accent:#ff174f;--accent2:#8b5cff;--cyan:#20d9ff;--gold:#ffc83d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(circle at 75% 5%,#211044 0,#090a10 30%,#05060a 70%);
+  color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:linear-gradient(120deg,transparent 0 45%,rgba(255,255,255,.025) 50%,transparent 55%);
+  animation:shine 7s linear infinite;
+}
+@keyframes shine{to{transform:translateX(100%)}}
+a{text-decoration:none;color:inherit}
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;height:74px;padding:0 5%;
+  display:flex;align-items:center;gap:34px;
+  background:linear-gradient(180deg,rgba(3,4,8,.96),rgba(3,4,8,.35),transparent);
+  backdrop-filter:blur(8px);
+}
+.logo{
+  font-size:25px;font-weight:900;letter-spacing:-1px;
+  background:linear-gradient(90deg,#fff,#ff285d,#a77aff,#22dfff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 14px rgba(255,23,79,.5));
+}
+.navlinks{display:flex;gap:23px;color:#d7d9e2;font-size:14px;font-weight:700}
+.navlinks a:hover{color:#fff}
+.navright{margin-left:auto;display:flex;align-items:center;gap:17px}
+.search{
+  width:210px;height:38px;border:1px solid rgba(255,255,255,.13);border-radius:22px;
+  background:rgba(255,255,255,.08);color:#fff;padding:0 16px;outline:none;
+}
+.search:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(32,217,255,.2)}
+.avatar{width:37px;height:37px;border-radius:50%;background:linear-gradient(135deg,#ff174f,#7c4dff);display:grid;place-items:center;font-weight:900;box-shadow:0 0 20px #ff174f55}
+.hero{
+  min-height:780px;position:relative;display:flex;align-items:center;padding:100px 6% 80px;
+  isolation:isolate;overflow:hidden;
+}
+.hero:before{
+  content:"";position:absolute;inset:0;z-index:-2;
+  background:
+   linear-gradient(90deg,#05060a 0%,rgba(5,6,10,.9) 25%,rgba(5,6,10,.25) 65%,#05060a 100%),
+   linear-gradient(0deg,#05060a 0%,transparent 25%,transparent 75%,#05060a 100%),
+   url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2200&q=90") center/cover;
+}
+.hero:after{
+  content:"";position:absolute;width:650px;height:650px;right:-150px;top:50px;
+  border-radius:50%;background:radial-gradient(circle,rgba(139,92,255,.34),transparent 67%);
+  filter:blur(25px);z-index:-1;animation:pulse 5s ease-in-out infinite;
+}
+@keyframes pulse{50%{transform:scale(1.15);opacity:.65}}
+.heroContent{max-width:680px;margin-top:35px;animation:rise 1s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(35px)}to{opacity:1;transform:none}}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:30px;
+  background:rgba(255,23,79,.13);border:1px solid rgba(255,23,79,.35);color:#ff7092;
+  font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.4px;
+  box-shadow:0 0 25px rgba(255,23,79,.13)
+}
+.badge i{width:7px;height:7px;background:#ff174f;border-radius:50%;box-shadow:0 0 12px #ff174f;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+h1{font-size:clamp(46px,7vw,90px);line-height:.92;margin:20px 0 19px;letter-spacing:-4px}
+.gradient{background:linear-gradient(90deg,#fff 10%,#ff406d 48%,#a77aff 80%,#20d9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.meta{display:flex;gap:13px;align-items:center;color:#e2e4ec;font-size:14px;font-weight:700;margin-bottom:18px}
+.meta span{color:#aeb4c4}
+.desc{color:#c0c5d1;line-height:1.65;font-size:16px;max-width:570px}
+.buttons{display:flex;gap:12px;margin-top:27px}
+.btn{
+  border:0;border-radius:8px;padding:13px 22px;font-weight:900;cursor:pointer;transition:.25s;
+  display:flex;align-items:center;gap:9px;font-size:14px
+}
+.primary{background:#fff;color:#07070b;box-shadow:0 0 25px rgba(255,255,255,.18)}
+.primary:hover{transform:translateY(-3px);box-shadow:0 0 35px rgba(255,255,255,.35)}
+.secondary{background:rgba(90,95,110,.7);color:#fff;backdrop-filter:blur(10px)}
+.secondary:hover{background:#777c8c;transform:translateY(-3px)}
+section{padding:15px 5% 28px;position:relative}
+.sectionHead{display:flex;align-items:end;justify-content:space-between;margin:0 0 16px}
+.sectionHead h2{font-size:23px}.sectionHead a{font-size:12px;color:#9ea5b5;font-weight:700}
+.row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(175px,1fr);gap:15px;overflow-x:auto;padding:6px 2px 18px;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.card{
+  position:relative;height:265px;border-radius:10px;overflow:hidden;background:#10131b;
+  border:1px solid rgba(255,255,255,.08);transition:.35s;cursor:pointer;
+  box-shadow:0 8px 30px rgba(0,0,0,.35)
+}
+.card:hover{transform:translateY(-9px) scale(1.035);z-index:3;border-color:rgba(255,255,255,.3);box-shadow:0 18px 45px rgba(0,0,0,.65),0 0 25px rgba(139,92,255,.15)}
+.card img{width:100%;height:100%;object-fit:cover;display:block;transition:.5s}
+.card:hover img{transform:scale(1.08)}
+.card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,4,8,.94),transparent 55%,rgba(0,0,0,.05))}
+.cardInfo{position:absolute;z-index:2;left:13px;right:10px;bottom:12px}
+.cardTitle{font-weight:900;font-size:14px;text-shadow:0 2px 8px #000}
+.cardMeta{font-size:10px;color:#b9bfcb;margin-top:5px}
+.tag{position:absolute;z-index:3;top:10px;left:10px;background:#ff174f;padding:5px 7px;border-radius:5px;font-size:9px;font-weight:900;box-shadow:0 0 16px #ff174f66}
+.progress{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#ff174f,#9d5cff,#20d9ff);z-index:5}
+.featureGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.feature{
+  min-height:145px;border-radius:13px;padding:20px;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025));
+  border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden;transition:.3s
+}
+.feature:hover{transform:translateY(-5px);border-color:rgba(32,217,255,.35);box-shadow:0 0 30px rgba(32,217,255,.09)}
+.feature .icon{font-size:28px;margin-bottom:12px;filter:drop-shadow(0 0 10px #20d9ff88)}
+.feature h3{font-size:15px;margin-bottom:7px}.feature p{color:#949baa;font-size:12px;line-height:1.5}
+.glowOrb{position:absolute;width:100px;height:100px;border-radius:50%;background:#8b5cff;filter:blur(50px);opacity:.2;right:-30px;bottom:-30px}
+footer{padding:60px 6% 35px;border-top:1px solid rgba(255,255,255,.07);margin-top:30px;color:#858b9b}
+.footerTop{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}.footerBrand{max-width:360px}
+.footerBrand p{font-size:12px;line-height:1.7;margin-top:12px}
+.footerLinks{display:flex;gap:50px}.footerLinks div{display:flex;flex-direction:column;gap:10px;font-size:12px}.footerLinks strong{color:#fff;margin-bottom:3px}
+.footerBottom{margin-top:45px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;display:flex;justify-content:space-between}
+@media(max-width:900px){.navlinks{display:none}.search{width:145px}.hero{min-height:680px}.featureGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){
+  .nav{height:62px;padding:0 18px}.logo{font-size:20px}.search{display:none}
+  .hero{padding:95px 20px 60px;min-height:670px}.hero:before{background:linear-gradient(90deg,#05060a 0%,rgba(5,6,10,.72) 100%),url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80") center/cover}
+  h1{letter-spacing:-2.5px}.desc{font-size:14px}.buttons{flex-wrap:wrap}.btn{padding:12px 17px}
+  section{padding-left:18px;padding-right:18px}.row{grid-auto-columns:145px}.card{height:220px}.featureGrid{grid-template-columns:1fr}
+  .footerLinks{gap:25px}.footerBottom{flex-direction:column;gap:10px}
+}
+
+/* ===== ADLAUI FLEX MOTION SYSTEM ===== */
+.logo{animation:logoFloat 3s ease-in-out infinite, logoGlow 2.4s ease-in-out infinite alternate}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes logoGlow{from{filter:drop-shadow(0 0 8px rgba(255,23,79,.25))}to{filter:drop-shadow(0 0 18px rgba(32,217,255,.5))}}
+.heroContent h1{animation:titleReveal 1.15s cubic-bezier(.2,.8,.2,1) both .15s}
+.heroContent .meta{animation:titleReveal .9s ease both .3s}
+.heroContent .desc{animation:titleReveal .9s ease both .42s}
+.heroContent .buttons{animation:titleReveal .9s ease both .54s}
+@keyframes titleReveal{from{opacity:0;transform:translateY(24px);filter:blur(7px)}to{opacity:1;transform:none;filter:blur(0)}}
+.sectionHead h2{animation:sectionPulse 3s ease-in-out infinite}
+@keyframes sectionPulse{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 18px rgba(255,23,79,.28)}}
+.cardTitle{animation:cardText 3.5s ease-in-out infinite}
+@keyframes cardText{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+.card .tag{animation:tagPulse 1.8s ease-in-out infinite}
+@keyframes tagPulse{50%{box-shadow:0 0 25px rgba(255,23,79,.75);transform:scale(1.04)}}
+.feature .icon{animation:iconFloat 2.5s ease-in-out infinite}
+@keyframes iconFloat{50%{transform:translateY(-5px) rotate(5deg)}}
+
+/* Watch screen */
+.watchModal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82);backdrop-filter:blur(18px);opacity:0;transition:opacity .3s}
+.watchModal.open{display:flex;opacity:1}
+.watchBox{width:min(1050px,96vw);max-height:94vh;overflow:auto;border:1px solid rgba(255,255,255,.13);border-radius:18px;background:linear-gradient(145deg,#11131c,#07080d);box-shadow:0 30px 100px #000,0 0 50px rgba(139,92,255,.18);transform:translateY(25px) scale(.97);transition:.35s}
+.watchModal.open .watchBox{transform:none}
+.watchTop{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.watchLogo{font-weight:900;letter-spacing:.5px;background:linear-gradient(90deg,#fff,#ff174f,#8b5cff,#20d9ff);-webkit-background-clip:text;color:transparent}
+.closeWatch{width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.09);color:#fff;font-size:22px;cursor:pointer;transition:.2s}
+.closeWatch:hover{background:#ff174f;transform:rotate(90deg)}
+.player{position:relative;aspect-ratio:16/9;background:#020307;overflow:hidden}
+.player video{width:100%;height:100%;display:block;object-fit:cover;background:#020307}
+.playerPoster{position:absolute;inset:0;background:center/cover no-repeat;display:flex;align-items:center;justify-content:center;transition:.3s}
+.playerPoster.hidden{opacity:0;pointer-events:none}
+.bigPlay{width:72px;height:72px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:28px;cursor:pointer;box-shadow:0 0 35px rgba(255,23,79,.35);transition:.25s}
+.bigPlay:hover{transform:scale(1.12);background:#ff174f}
+.playerShade{position:absolute;inset:auto 0 0;height:110px;background:linear-gradient(transparent,rgba(0,0,0,.9));pointer-events:none}
+.controls{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:15px 18px 14px}
+.seek{width:100%;accent-color:#ff174f;cursor:pointer}
+.controlRow{display:flex;align-items:center;gap:10px;margin-top:7px}
+.controlBtn{border:0;background:transparent;color:#fff;font-size:18px;cursor:pointer;padding:4px 7px}
+.time{font-size:11px;color:#d5d7df;margin-left:auto}
+.watchInfo{padding:18px 20px 22px}
+.watchTitle{font-size:25px;font-weight:900;margin-bottom:6px}
+.watchMeta{font-size:12px;color:#aeb4c4;margin-bottom:10px}
+.watchDesc{font-size:13px;color:#aeb0bc;line-height:1.65;max-width:800px}
+.watchActions{display:flex;gap:10px;margin-top:15px}
+.watchAction{border:0;border-radius:8px;padding:10px 15px;background:rgba(255,255,255,.09);color:#fff;font-weight:800;cursor:pointer}
+.watchAction:hover{background:rgba(255,23,79,.8)}
+.smartLinkAction{border:0;border-radius:10px;padding:10px 16px;font-weight:900;cursor:pointer;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#ff174f,#8b5cff,#20d9ff);box-shadow:0 0 22px rgba(139,92,255,.28);transition:.25s;position:relative;overflow:hidden}
+.smartLinkAction:before{content:"";position:absolute;inset:-60% -20%;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.38) 50%,transparent 65%);transform:translateX(-70%) rotate(8deg);transition:.55s}
+.smartLinkAction:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 30px rgba(32,217,255,.35)}
+.smartLinkAction:hover:before{transform:translateX(70%) rotate(8deg)}
+
+body.modalOpen{overflow:hidden}
+
+
+.top10Section{padding-top:35px}
+.top10Row{grid-auto-columns:minmax(185px,1fr)}
+.top10Row .card{height:285px}
+.top10Row .card img{background:linear-gradient(145deg,#151722,#07080c)}
+.top10Row .card:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.11) 50%,transparent 65%);transform:translateX(-120%);transition:.5s;pointer-events:none}
+.top10Row .card:hover:before{transform:translateX(120%)}
+@media(max-width:560px){.top10Row{grid-auto-columns:155px}.top10Row .card{height:235px}}
+
+
+.recentDemand{padding-top:36px}
+.recentDemand .top10Row .card{height:285px}
+.recentDemand .top10Row .card:after{background:linear-gradient(0deg,rgba(3,4,8,.96),transparent 56%,rgba(0,0,0,.02))}
+.recentDemand .top10Row .card:hover{box-shadow:0 20px 50px rgba(0,0,0,.7),0 0 28px rgba(255,23,79,.15)}
+@media(max-width:560px){.recentDemand .top10Row .card{height:235px}}
+
+
+/* ===== MY LIST EXPERIENCE ===== */
+.myListSection{padding:58px 5vw 30px;position:relative;scroll-margin-top:80px}
+.myListSection:before{content:"";position:absolute;left:5vw;right:5vw;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(32,217,255,.45),rgba(255,23,79,.45),transparent)}
+.myListTools{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:8px 0 24px}
+.myListCount{color:var(--muted,#9aa3b2);font-size:.92rem}
+.myListActions{display:flex;gap:10px;flex-wrap:wrap}
+.myListBtn{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;transition:.25s;backdrop-filter:blur(10px)}
+.myListBtn:hover{transform:translateY(-2px);border-color:rgba(32,217,255,.45);box-shadow:0 0 24px rgba(32,217,255,.12)}
+.myListBtn.danger:hover{border-color:rgba(255,23,79,.55);box-shadow:0 0 24px rgba(255,23,79,.14)}
+.myListGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px}
+.myListItem{position:relative;min-width:0;border-radius:18px;overflow:hidden;background:#0c0e15;border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 35px rgba(0,0,0,.3);transition:.28s}
+.myListItem:hover{transform:translateY(-5px);border-color:rgba(32,217,255,.32);box-shadow:0 22px 48px rgba(0,0,0,.48),0 0 26px rgba(32,217,255,.08)}
+.myListItem img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:#111}
+.myListItemInfo{padding:13px}
+.myListItemTitle{font-weight:900;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.myListItemMeta{font-size:.78rem;color:#9ca5b5;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.myListItemBtns{display:flex;gap:8px;margin-top:12px}
+.myListItemBtns button{flex:1;border:0;border-radius:10px;padding:9px 8px;font-weight:900;cursor:pointer;color:#fff;background:rgba(255,255,255,.08)}
+.myListItemBtns .playSaved{background:linear-gradient(135deg,#20d9ff,#7c5cff)}
+.myListItemBtns .removeSaved:hover{background:rgba(255,23,79,.18)}
+.myListEmpty{display:none;min-height:220px;border:1px dashed rgba(255,255,255,.14);border-radius:20px;align-items:center;justify-content:center;text-align:center;padding:35px;background:radial-gradient(circle at 50% 0,rgba(32,217,255,.08),transparent 55%),rgba(255,255,255,.02)}
+.myListEmpty.show{display:flex}
+.myListEmpty strong{display:block;font-size:1.15rem;margin-bottom:8px}
+.myListEmpty span{display:block;color:#8e97a7;max-width:440px;line-height:1.6}
+@media(max-width:700px){.myListGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.myListSection{padding-left:4vw;padding-right:4vw}.myListSection:before{left:4vw;right:4vw}}
+@media(max-width:390px){.myListGrid{grid-template-columns:1fr 1fr}.myListItemInfo{padding:10px}.myListItemBtns{flex-direction:column}}
+
+
+/* ===== TIKTOK CREATOR PROFILE ===== */
+.tiktokCreator{position:relative;margin-top:34px;padding:18px 20px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));display:flex;align-items:center;gap:14px;max-width:390px;overflow:hidden;transition:.3s ease;box-shadow:0 12px 35px rgba(0,0,0,.22)}
+.tiktokCreator:before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 90deg,transparent,rgba(37,244,238,.14),transparent,rgba(254,44,85,.13),transparent);animation:ttSpin 8s linear infinite;pointer-events:none}
+.tiktokCreator>*{position:relative;z-index:1}
+.tiktokCreator:hover{transform:translateY(-4px);border-color:rgba(37,244,238,.3);box-shadow:0 18px 45px rgba(0,0,0,.35)}
+.tiktokAvatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:0 0 54px;background:#050505;border:1px solid rgba(255,255,255,.12);box-shadow:-3px 0 0 rgba(37,244,238,.75),3px 0 0 rgba(254,44,85,.75);font-weight:1000;font-size:20px;color:#fff}
+.tiktokCreatorText{display:flex;flex-direction:column;gap:3px;min-width:0}.tiktokCreatorText small{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#9b9ba5;font-weight:800}.tiktokCreatorText strong{font-size:16px;color:#fff;letter-spacing:.2px}.tiktokCreatorText span{font-size:11px;color:#a7a7b0}
+.tiktokFollow{margin-left:auto;white-space:nowrap;padding:10px 13px;border-radius:11px;background:#fff;color:#080808;font-size:11px;font-weight:1000;text-decoration:none;transition:.25s ease}.tiktokFollow:hover{transform:scale(1.05);box-shadow:0 0 22px rgba(255,255,255,.2)}
+@keyframes ttSpin{to{transform:rotate(360deg)}}
+@media(max-width:620px){.tiktokCreator{max-width:none}.tiktokFollow{padding:9px 10px}.tiktokCreatorText strong{font-size:14px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="#">ADLAUI FLEX</a>
+  <div class="navlinks">
+    <a href="#home">Home</a><a href="#trending">Trending</a><a href="#movies">Movies</a><a href="#series">Series</a><a href="#mylist">My List</a>
+  </div>
+  <div class="navright"><input class="search" id="search" placeholder="Search titles..."><div class="avatar">AF</div></div>
+</nav>
+
+<header class="hero" id="home">
+  <div class="heroContent">
+    <div class="badge"><i></i> Adlaui Flex Original</div>
+    <h1>THE NIGHT<br><span class="gradient">BEYOND</span></h1>
+    <div class="meta"><b>2026</b><span>•</span><b>16+</b><span>•</span><b>2h 18m</b><span>•</span><b>4K</b><span>•</span><b>HDR</b></div>
+    <p class="desc">A cinematic journey through a city where every secret has a price. Discover powerful stories, unforgettable characters and worlds made to keep you watching.</p>
+    <div class="buttons"><button class="btn primary" onclick="playDemo()">▶ Play</button><button class="btn secondary" id="heroMyListBtn">＋ My List</button></div>
+  </div>
+</header>
+
+
+<section id="top10" class="top10Section">
+  <div class="sectionHead">
+    <div>
+      <div class="badge" style="margin-bottom:9px">SEPTEMBER 2026</div>
+      <h2>🔥 Top 10 Featured Movies</h2>
+    </div>
+    <a href="#top10">September Picks</a>
+  </div>
+  <div class="row top10Row">
+
+    <article class="card" data-description="A biographical drama about Sylvester Stallone writing Rocky and fighting for the chance to play Rocky Balboa." data-video="">
+      <span class="tag">#1</span>
+      <img src="https://i.imgur.com/qLWNFWV.jpeg" alt="I Play Rocky poster">
+      <div class="cardInfo"><div class="cardTitle">I Play Rocky</div><div class="cardMeta">Drama • Biography • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A documentary following Oasis and their Live '25 reunion tour, with backstage and onstage access." data-video="">
+      <span class="tag">#2</span>
+      <img src="https://thefader-res.cloudinary.com/private_images/w_760%2Cc_limit%2Cf_auto%2Cq_auto%3Abest/OASIS_eyntpo/oasis-dont-look-back-in-anger-documentary-trailer-preorder-tickets.jpg" alt="Oasis Don't Look Back in Anger poster">
+      <div class="cardInfo"><div class="cardTitle">Oasis: Don't Look Back in Anger</div><div class="cardMeta">Documentary • Music • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="CIA agents Chris and Lee are sent from Santiago to Easter Island shortly before the 1973 Chilean coup." data-video="">
+      <span class="tag">#3</span>
+      <img src="https://upload.wikimedia.org/wikipedia/en/4/44/Wild_Horse_Nine_poster.jpeg" alt="Wild Horse Nine poster">
+      <div class="cardInfo"><div class="cardTitle">Wild Horse Nine</div><div class="cardMeta">Action • Thriller • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A cinematic continuation of the Mirzapur crime saga, expanding its world of power, crime and revenge." data-video="">
+      <span class="tag">#4</span>
+      <img src="https://starworldcinemas.com/wp-content/uploads/2026/03/Mirzapur-The-Movie.jpg" alt="Mirzapur The Movie">
+      <div class="cardInfo"><div class="cardTitle">Mirzapur: The Movie</div><div class="cardMeta">Crime • Action • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Julia and Clara travel to Portugal after their daughters leave for an exchange program, turning a holiday into a journey of friendship and discovery." data-video="">
+      <span class="tag">#5</span>
+      <img src="https://www.purepeople.com.br/media/cache/thumb_660/media/articles/4745280/4745280.jpg" alt="Minha Melhor Amiga poster">
+      <div class="cardInfo"><div class="cardTitle">Minha Melhor Amiga</div><div class="cardMeta">Comedy • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A young FBI agent investigating killings in 1960s Mississippi is forced to work with a notorious mob hitman." data-video="">
+      <span class="tag">#6</span>
+      <img src="https://www.impawards.com/2026/posters/by_any_means.jpg" alt="By Any Means poster">
+      <div class="cardInfo"><div class="cardTitle">By Any Means</div><div class="cardMeta">Crime • Thriller • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A former soldier races through a dangerous mission involving a human organ donation while criminal forces close in." data-video="">
+      <span class="tag">#7</span>
+      <img src="https://images.angelstudios.com/image/upload/q_auto%2Cw_620%2Ch_930%2Cf_webp%2Cc_scale/v1784069294/studio-app/catalog/2be82aeb-4a2b-4a94-b5cf-a7b7b4223f91" alt="Runner poster">
+      <div class="cardInfo"><div class="cardTitle">Runner</div><div class="cardMeta">Action • Thriller • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A historical action drama inspired by the 1381 English Peasants' Revolt." data-video="">
+      <span class="tag">#8</span>
+      <img src="https://media.the-numbers.com/images/movie-posters/Uprising-The-%282026%29.jpg" alt="The Uprising poster">
+      <div class="cardInfo"><div class="cardTitle">The Uprising</div><div class="cardMeta">Historical • Action • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A drama inspired by true events tracing Ted Kaczynski's path from Harvard prodigy to the Unabomber as the FBI hunts him." data-video="">
+      <span class="tag">#9</span>
+      <img src="https://www.impawards.com/2026/posters/unabomber_ver4.jpg" alt="Unabomber poster">
+      <div class="cardInfo"><div class="cardTitle">Unabomber</div><div class="cardMeta">Crime • Drama • Netflix</div></div>
+    </article>
+
+    <article class="card" data-description="A Special Forces veteran and his service dog fight to survive in the Alaskan wilderness after a plane crash." data-video="">
+      <span class="tag">#10</span>
+      <img src="https://www.cinemajestic.nl/uploads/Products/product_4165/HeartoftheBeast_134287900335438738_big.jpg" alt="Heart of the Beast poster">
+      <div class="cardInfo"><div class="cardTitle">Heart of the Beast</div><div class="cardMeta">Survival • Adventure • 2026</div></div>
+    </article>
+
+  </div>
+</section>
+
+
+<section id="recent-demand" class="recentDemand">
+  <div class="sectionHead">
+    <div>
+      <div class="badge" style="margin-bottom:9px"><i></i> RESEARCH • SEPTEMBER 2026</div>
+      <h2>🚀 Movies in Demand Right Now</h2>
+    </div>
+    <a href="#recent-demand">Fresh Picks</a>
+  </div>
+  <div class="row top10Row">
+
+    <article class="card" data-description="Resident Evil is one of the strongest current theatrical attention titles in September 2026, following its September 18 release." data-video="">
+      <span class="tag">HOT</span>
+      <img src="https://d9s3e2ooa0od7.cloudfront.net/assets/resident-evil/4569e7e0-a5b5-4b5b-84fc-2c39ede8ac67/4569e7e0-a5b5-4b5b-84fc-2c39ede8ac67.jpg" alt="Resident Evil 2026 poster">
+      <div class="cardInfo"><div class="cardTitle">Resident Evil</div><div class="cardMeta">Horror • Sci‑Fi • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Jason Statham stars in this action thriller about a man framed for murder who uncovers an international conspiracy aboard a cargo ship." data-video="">
+      <span class="tag">HOT</span>
+      <img src="https://img.asmedia.epimg.net/resizer/v2/Q6VNCXDA4VFE7HNF67M4BPQFHE.jpg?auth=cafeb76b13ea248ef0633d2d6567f7d26ffbf104a340d8e680c18a707755d95c&width=1440" alt="Mutiny 2026 poster">
+      <div class="cardInfo"><div class="cardTitle">Mutiny</div><div class="cardMeta">Action • Thriller • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A Special Forces veteran and his service dog fight to survive in the Alaskan wilderness after a plane crash." data-video="">
+      <span class="tag">NEW</span>
+      <img src="https://www.cinemajestic.nl/uploads/Products/product_4165/HeartoftheBeast_134287900335438738_big.jpg" alt="Heart of the Beast poster">
+      <div class="cardInfo"><div class="cardTitle">Heart of the Beast</div><div class="cardMeta">Adventure • Thriller • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="A mysterious cosmic event transports a suburban neighborhood to an unknown world, forcing one family to fight for survival." data-video="">
+      <span class="tag">TREND</span>
+      <img src="https://image.tmdb.org/t/p/original/b9q9VmbXDvJmTziRqkwdEmFdwhr.jpg" alt="The End of Oak Street poster">
+      <div class="cardInfo"><div class="cardTitle">The End of Oak Street</div><div class="cardMeta">Sci‑Fi • Mystery • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Peter Parker continues his life as Spider-Man while a new threat pushes him toward a dangerous transformation." data-video="">
+      <span class="tag">TOP</span>
+      <img src="https://image.tmdb.org/t/p/w500/yyB2VJEW3an2xCdcYCPQhn9QERR.jpg" alt="Spider-Man Brand New Day poster">
+      <div class="cardInfo"><div class="cardTitle">Spider-Man: Brand New Day</div><div class="cardMeta">Action • Adventure • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Christopher Nolan's epic adaptation follows Odysseus on his dangerous journey home after the Trojan War." data-video="">
+      <span class="tag">TOP</span>
+      <img src="https://image.tmdb.org/t/p/w500/x5JKwcrl7NzaSWfTFh6bIPCsqJd.jpg" alt="The Odyssey poster">
+      <div class="cardInfo"><div class="cardTitle">The Odyssey</div><div class="cardMeta">Epic • Adventure • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Mario and Luigi return for a new animated adventure across the stars as a fresh threat emerges." data-video="">
+      <span class="tag">FAMILY</span>
+      <img src="https://image.tmdb.org/t/p/w500/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg" alt="The Super Mario Galaxy Movie poster">
+      <div class="cardInfo"><div class="cardTitle">The Super Mario Galaxy Movie</div><div class="cardMeta">Animation • Family • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Ryan Gosling stars as an astronaut facing an impossible mission far from Earth." data-video="">
+      <span class="tag">4K</span>
+      <img src="https://artofthemovies.co.uk/cdn/shop/files/project-hail-mary_3wqicwjn.jpg?v=1776694519&width=1200" alt="Project Hail Mary poster">
+      <div class="cardInfo"><div class="cardTitle">Project Hail Mary</div><div class="cardMeta">Sci‑Fi • Adventure • 2026</div></div>
+    </article>
+
+    <article class="card" data-description="Tyler Perry's sequel brings the familiar group together again as family, relationships and a wedding create new complications." data-video="">
+      <span class="tag">NETFLIX</span>
+      <img src="https://image.tmdb.org/t/p/original/75FVDml3YbKEXi6bhHEk0HCTbC.jpg" alt="Why Did I Get Married Again poster">
+      <div class="cardInfo"><div class="cardTitle">Why Did I Get Married Again?</div><div class="cardMeta">Comedy • Drama • Netflix</div></div>
+    </article>
+
+    <article class="card" data-description="A father and son move to a town haunted by the legacy of a serial killer known as the Whisper Man." data-video="">
+      <span class="tag">NETFLIX</span>
+      <img src="https://dnm.nflximg.net/api/v6/2DuQlx0fM4wd1nzqm5BFBi6ILa8/AAAAQb57oeMQTOfm0O3jR6VHHQ0CasenHFta4XW97GKA-458MDqx09VUXyeDz8neIjXbOVe-Z8lJRdqiF9_KUBp1I0IMG6DwSenZlVMk95PWsYLLGfb_A8xnM46enOY9qpHhqn3a0X2ypfLGFm1yJxaiBwCn.jpg?r=d3f" alt="The Whisper Man poster">
+      <div class="cardInfo"><div class="cardTitle">The Whisper Man</div><div class="cardMeta">Thriller • Mystery • Netflix</div></div>
+    </article>
+
+    <article class="card" data-description="A crime drama inspired by the Ted Kaczynski manhunt, starring Russell Crowe and Jacob Tremblay." data-video="">
+      <span class="tag">#1</span>
+      <img src="https://www.impawards.com/2026/posters/unabomber_ver4.jpg" alt="Unabomber poster">
+      <div class="cardInfo"><div class="cardTitle">Unabomber</div><div class="cardMeta">Crime • Drama • Netflix</div></div>
+    </article>
+
+  </div>
+</section>
+
+<section id="trending">
+  <div class="sectionHead"><h2>🔥 Trending Now</h2><a href="#">View all</a></div>
+  <div class="row">
+    <article class="card"><span class="tag">#1</span><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Midnight City</div><div class="cardMeta">Action • 2026 • 4K</div></div></article>
+    <article class="card"><span class="tag">#2</span><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Dark Horizon</div><div class="cardMeta">Sci‑Fi • 2026 • 4K</div></div></article>
+    <article class="card"><span class="tag">#3</span><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Wild Escape</div><div class="cardMeta">Adventure • 2026</div></div></article>
+    <article class="card"><span class="tag">#4</span><img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Final Scene</div><div class="cardMeta">Drama • 2026 • 4K</div></div></article>
+    <article class="card"><span class="tag">#5</span><img src="https://images.unsplash.com/photo-1533928298208-27ff66555d8d?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Neon Streets</div><div class="cardMeta">Crime • 2026</div></div></article>
+  </div>
+</section>
+
+<section id="movies">
+  <div class="sectionHead"><h2>🎬 Popular Movies</h2><a href="#">Explore</a></div>
+  <div class="row">
+    <article class="card"><img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Frozen World</div><div class="cardMeta">Drama • 2h 04m</div></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1470214304380-aadaedcfff1b?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Lost Planet</div><div class="cardMeta">Sci‑Fi • 1h 52m</div></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Last Road</div><div class="cardMeta">Thriller • 2h 11m</div></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">The Forest</div><div class="cardMeta">Mystery • 1h 48m</div></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Cinema Night</div><div class="cardMeta">Comedy • 1h 44m</div></div></article>
+  </div>
+</section>
+
+<section id="series">
+  <div class="sectionHead"><h2>✨ Continue Watching</h2><a href="#">See all</a></div>
+  <div class="row">
+    <article class="card"><img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">The Signal</div><div class="cardMeta">S1:E5 • 42m left</div></div><div class="progress" style="width:72%"></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Code Zero</div><div class="cardMeta">S2:E3 • 18m left</div></div><div class="progress" style="width:48%"></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">The Office</div><div class="cardMeta">S4:E8 • 31m left</div></div><div class="progress" style="width:61%"></div></article>
+    <article class="card"><img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=85"><div class="cardInfo"><div class="cardTitle">Beyond Earth</div><div class="cardMeta">S1:E2 • 27m left</div></div><div class="progress" style="width:36%"></div></article>
+  </div>
+</section>
+
+<section>
+  <div class="sectionHead"><h2>⚡ Why Adlaui Flex</h2></div>
+  <div class="featureGrid">
+    <div class="feature"><div class="icon">◈</div><h3>Ultra HD Streaming</h3><p>Sharp cinematic quality with a modern dark interface designed for immersive viewing.</p><div class="glowOrb"></div></div>
+    <div class="feature"><div class="icon">✦</div><h3>Smart Discovery</h3><p>Find new movies and series through clean categories and fast search.</p><div class="glowOrb"></div></div>
+    <div class="feature"><div class="icon">◉</div><h3>Any Screen</h3><p>Responsive design adapts beautifully to phones, tablets and desktop screens.</p><div class="glowOrb"></div></div>
+    <div class="feature"><div class="icon">∞</div><h3>Built for Speed</h3><p>Lightweight single-page structure with smooth effects and no framework required.</p><div class="glowOrb"></div></div>
+  </div>
+</section>
+
+
+<!-- ===== WATCH EXPERIENCE ===== -->
+<div class="watchModal" id="watchModal" aria-hidden="true">
+  <div class="watchBox">
+    <div class="watchTop">
+      <div class="watchLogo">ADLAUI FLEX • WATCH</div>
+      <button class="closeWatch" id="closeWatch" aria-label="Close">×</button>
+    </div>
+    <div class="player">
+      <video id="watchVideo" playsinline preload="metadata"></video>
+      <div class="playerPoster" id="playerPoster">
+        <button class="bigPlay" id="bigPlay">▶</button>
+      </div>
+      <div class="playerShade"></div>
+      <div class="controls">
+        <input class="seek" id="seek" type="range" min="0" max="100" value="0">
+        <div class="controlRow">
+          <button class="controlBtn" id="togglePlay">▶</button>
+          <button class="controlBtn" id="muteBtn">🔊</button>
+          <input id="volume" type="range" min="0" max="1" step=".05" value="1" style="width:90px;accent-color:#20d9ff">
+          <span class="time" id="timeLabel">00:00 / 00:00</span>
+          <button class="controlBtn" id="fullscreenBtn">⛶</button>
+        </div>
+      </div>
+    </div>
+    <div class="watchInfo">
+      <div class="watchTitle" id="watchTitle">Movie</div>
+      <div class="watchMeta" id="watchMeta">ADLAUI FLEX • 4K</div>
+      <p class="watchDesc" id="watchDesc">Your movie description will appear here. Send me the movie names, image links and video links and I will connect them directly to this watch screen.</p>
+      <div class="watchActions">
+        <button class="watchAction" id="addWatchList">＋ Add to My List</button>
+        <a class="smartLinkAction" id="smartLinkBtn" href="https://www.profitableratecpmnetwork.com/gh14gb6e?key=6c71d4442af1893b6fec3a58f39f5619" target="_blank" rel="noopener noreferrer sponsored">▶ Watch Now</a>
+        <button class="watchAction" id="closeWatch2">Back to Browse</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== MY LIST ===== -->
+<section id="mylist" class="myListSection">
+  <div class="sectionHead">
+    <div>
+      <div class="badge" style="margin-bottom:9px">YOUR COLLECTION</div>
+      <h2>❤️ My List</h2>
+    </div>
+    <span class="myListCount" id="myListCount">0 saved</span>
+  </div>
+  <div class="myListTools">
+    <div class="myListCount" id="myListStatus">Save movies here and they will stay in your browser.</div>
+    <div class="myListActions">
+      <button class="myListBtn" id="myListRefresh">↻ Refresh</button>
+      <button class="myListBtn danger" id="myListClear">🗑 Clear My List</button>
+    </div>
+  </div>
+  <div class="myListGrid" id="myListGrid"></div>
+  <div class="myListEmpty" id="myListEmpty">
+    <div>
+      <strong>Your My List is empty</strong>
+      <span>Open any movie, then press “＋ Add to My List”. Your saved movies will appear here and remain saved after refresh.</span>
+    </div>
+  </div>
+</section>
+
+<footer id="footer">
+  <div class="footerTop">
+    <div class="footerBrand"><div class="logo">ADLAUI FLEX</div><p>Your cinematic space for discovering stories, exploring new worlds and enjoying a premium streaming-style experience.</p></div>
+
+    <a class="tiktokCreator" href="https://www.tiktok.com/@danel_play" target="_blank" rel="noopener noreferrer" aria-label="Follow Adlaui Flex on TikTok @danel_play">
+      <div class="tiktokAvatar" aria-hidden="true">♪</div>
+      <div class="tiktokCreatorText">
+        <small>Follow us on TikTok</small>
+        <strong>@danel_play</strong>
+        <span>New movies • fresh picks • updates</span>
+      </div>
+      <span class="tiktokFollow">Follow</span>
+    </a>
+    <div class="footerLinks"><div><strong>Platform</strong><a href="#">Home</a><a href="#">Movies</a><a href="#">Series</a></div><div><strong>Support</strong><a href="#">Help Center</a><a href="#">Contact</a><a href="#">Privacy</a></div></div>
+  </div>
+  <div class="footerBottom"><span>© 2026 Adlaui Flex. All rights reserved.</span><span>Designed for a premium viewing experience.</span></div>
+</footer>
+
+<script>
+const search = document.getElementById('search');
+const modal = document.getElementById('watchModal');
+const ADLAUI_SMARTLINK = 'https://www.profitableratecpmnetwork.com/gh14gb6e?key=6c71d4442af1893b6fec3a58f39f5619';
+const smartLinkBtn = document.getElementById('smartLinkBtn');
+if (smartLinkBtn) smartLinkBtn.href = ADLAUI_SMARTLINK;
+
+const closeWatch = document.getElementById('closeWatch');
+const closeWatch2 = document.getElementById('closeWatch2');
+const video = document.getElementById('watchVideo');
+const poster = document.getElementById('playerPoster');
+const bigPlay = document.getElementById('bigPlay');
+const togglePlay = document.getElementById('togglePlay');
+const muteBtn = document.getElementById('muteBtn');
+const volume = document.getElementById('volume');
+const seek = document.getElementById('seek');
+const timeLabel = document.getElementById('timeLabel');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const watchTitle = document.getElementById('watchTitle');
+const watchMeta = document.getElementById('watchMeta');
+const watchDesc = document.getElementById('watchDesc');
+const addWatchList = document.getElementById('addWatchList');
+
+let currentCard = null;
+
+function formatTime(sec){
+  if(!Number.isFinite(sec)) return '00:00';
+  const m = Math.floor(sec/60), s = Math.floor(sec%60);
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function openWatch(card){
+  currentCard = card;
+  const title = card.querySelector('.cardTitle')?.textContent.trim() || 'Movie';
+  const meta = card.querySelector('.cardMeta')?.textContent.trim() || 'ADLAUI FLEX';
+  const img = card.querySelector('img')?.src || '';
+  const desc = card.dataset.description || `Watch ${title} on Adlaui Flex in a cinematic streaming experience.`;
+
+  watchTitle.textContent = title;
+  watchMeta.textContent = meta;
+  watchDesc.textContent = desc;
+  poster.style.backgroundImage = `url("${img}")`;
+  poster.classList.remove('hidden');
+
+  /* Later, put your real video URL in: data-video="YOUR_VIDEO_URL" */
+  const src = card.dataset.video || '';
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+
+  if(src){
+    video.src = src;
+    video.load();
+  }
+  togglePlay.textContent = '▶';
+  bigPlay.textContent = '▶';
+  seek.value = 0;
+  timeLabel.textContent = '00:00 / 00:00';
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('modalOpen');
+  syncWatchListButton();
+}
+
+function closeModal(){
+  video.pause();
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('modalOpen');
+}
+
+function startPlayback(){
+  if(!video.src){
+    poster.classList.add('hidden');
+    togglePlay.textContent = '❚❚';
+    bigPlay.textContent = '❚❚';
+    /* No URL yet: keep the watch interface active until your video URL is supplied. */
+    return;
+  }
+  video.play().then(()=>{
+    poster.classList.add('hidden');
+    togglePlay.textContent = '❚❚';
+    bigPlay.textContent = '❚❚';
+  }).catch(()=>{});
+}
+
+function togglePlayback(){
+  if(!video.src){
+    startPlayback();
+    return;
+  }
+  if(video.paused){
+    startPlayback();
+  }else{
+    video.pause();
+    togglePlay.textContent = '▶';
+    bigPlay.textContent = '▶';
+    poster.classList.remove('hidden');
+  }
+}
+
+search.addEventListener('input',()=>{
+  const q=search.value.toLowerCase().trim();
+  document.querySelectorAll('.card').forEach(c=>{
+    const t=c.innerText.toLowerCase();
+    const match=!q || t.includes(q);
+    c.style.opacity=match?'1':'.18';
+    c.style.filter=match?'none':'grayscale(1)';
+    c.style.transform=match?'':'scale(.96)';
+  });
+});
+
+/* Every movie card opens the watch screen */
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('click',()=>openWatch(card));
+});
+
+/* Hero Play opens the featured title in the same watch interface */
+function playDemo(){
+  const first = document.querySelector('#trending .card');
+  if(first) openWatch(first);
+}
+
+closeWatch.addEventListener('click',closeModal);
+closeWatch2.addEventListener('click',closeModal);
+modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+bigPlay.addEventListener('click',togglePlayback);
+togglePlay.addEventListener('click',togglePlayback);
+
+video.addEventListener('play',()=>{
+  poster.classList.add('hidden');
+  togglePlay.textContent='❚❚';
+  bigPlay.textContent='❚❚';
+});
+video.addEventListener('pause',()=>{
+  togglePlay.textContent='▶';
+  bigPlay.textContent='▶';
+});
+video.addEventListener('loadedmetadata',()=>{
+  timeLabel.textContent=`00:00 / ${formatTime(video.duration)}`;
+});
+video.addEventListener('timeupdate',()=>{
+  if(video.duration){
+    seek.value=(video.currentTime/video.duration)*100;
+    timeLabel.textContent=`${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+  }
+});
+seek.addEventListener('input',()=>{
+  if(video.duration) video.currentTime=(seek.value/100)*video.duration;
+});
+volume.addEventListener('input',()=>{video.volume=Number(volume.value);});
+muteBtn.addEventListener('click',()=>{
+  video.muted=!video.muted;
+  muteBtn.textContent=video.muted?'🔇':'🔊';
+});
+fullscreenBtn.addEventListener('click',()=>{
+  const player=document.querySelector('.player');
+  if(document.fullscreenElement) document.exitFullscreen();
+  else player.requestFullscreen?.();
+});
+
+/* ===== MY LIST STATE / PERSISTENCE =====
+   Uses localStorage so saved movies survive refreshes and future visits.
+   The older adlaui_mylist_TITLE keys are migrated automatically. */
+const MY_LIST_KEY = 'adlaui_mylist_v2';
+const myListGrid = document.getElementById('myListGrid');
+const myListEmpty = document.getElementById('myListEmpty');
+const myListCount = document.getElementById('myListCount');
+const myListStatus = document.getElementById('myListStatus');
+const myListClear = document.getElementById('myListClear');
+const myListRefresh = document.getElementById('myListRefresh');
+const heroMyListBtn = document.getElementById('heroMyListBtn');
+
+function readMyList(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(MY_LIST_KEY) || '[]');
+    return Array.isArray(saved) ? saved.filter(x=>x && x.title) : [];
+  }catch(e){ return []; }
+}
+
+function writeMyList(list){
+  try{ localStorage.setItem(MY_LIST_KEY, JSON.stringify(list)); }catch(e){}
+}
+
+function cardData(card){
+  return {
+    title: card.querySelector('.cardTitle')?.textContent.trim() || 'Movie',
+    meta: card.querySelector('.cardMeta')?.textContent.trim() || 'ADLAUI FLEX',
+    description: card.dataset.description || '',
+    image: card.querySelector('img')?.src || '',
+    video: card.dataset.video || '',
+    savedAt: Date.now()
+  };
+}
+
+function migrateOldMyList(){
+  const current = readMyList();
+  const known = new Set(current.map(x=>x.title));
+  const allCards = [...document.querySelectorAll('.card')];
+  let changed = false;
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    if(!key || !key.startsWith('adlaui_mylist_') || key === MY_LIST_KEY) continue;
+    const title = key.slice('adlaui_mylist_'.length);
+    if(!title || known.has(title)) continue;
+    const card = allCards.find(c => (c.querySelector('.cardTitle')?.textContent.trim() || '') === title);
+    if(card){ current.push(cardData(card)); known.add(title); changed = true; }
+  }
+  if(changed) writeMyList(current);
+  return current;
+}
+
+function isSaved(title){
+  return readMyList().some(x=>x.title === title);
+}
+
+function syncWatchListButton(){
+  const title = currentCard?.querySelector('.cardTitle')?.textContent.trim() || '';
+  const saved = title && isSaved(title);
+  addWatchList.textContent = saved ? '✓ Added to My List' : '＋ Add to My List';
+  addWatchList.classList.toggle('saved', !!saved);
+}
+
+function renderMyList(){
+  const list = migrateOldMyList();
+  myListGrid.innerHTML = '';
+  myListCount.textContent = `${list.length} ${list.length===1?'saved title':'saved titles'}`;
+  myListStatus.textContent = list.length ? 'Your saved movies are stored in this browser.' : 'Save movies here and they will stay in your browser.';
+  myListEmpty.classList.toggle('show', list.length===0);
+  myListGrid.style.display = list.length ? 'grid' : 'none';
+
+  list.forEach((item, index)=>{
+    const article = document.createElement('article');
+    article.className = 'myListItem';
+    article.innerHTML = `
+      <img src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.title)} poster" loading="lazy">
+      <div class="myListItemInfo">
+        <div class="myListItemTitle" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+        <div class="myListItemMeta">${escapeHtml(item.meta || 'ADLAUI FLEX')}</div>
+        <div class="myListItemBtns">
+          <button class="playSaved" data-index="${index}">▶ Watch</button>
+          <button class="removeSaved" data-index="${index}">✕ Remove</button>
+        </div>
+      </div>`;
+    myListGrid.appendChild(article);
+  });
+  syncWatchListButton();
+}
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+}
+
+function addCurrentToMyList(){
+  if(!currentCard) return;
+  const item = cardData(currentCard);
+  const list = readMyList();
+  const existing = list.findIndex(x=>x.title === item.title);
+  if(existing >= 0){
+    list[existing] = {...list[existing], ...item, savedAt:list[existing].savedAt || Date.now()};
+  }else{
+    list.push(item);
+  }
+  writeMyList(list);
+  renderMyList();
+  addWatchList.textContent='✓ Added to My List';
+}
+
+function removeFromMyList(title){
+  writeMyList(readMyList().filter(x=>x.title !== title));
+  renderMyList();
+}
+
+addWatchList.addEventListener('click', addCurrentToMyList);
+
+myListGrid.addEventListener('click',(e)=>{
+  const btn=e.target.closest('button[data-index]');
+  if(!btn) return;
+  const index=Number(btn.dataset.index);
+  const list=readMyList();
+  const item=list[index];
+  if(!item) return;
+  if(btn.classList.contains('removeSaved')){
+    removeFromMyList(item.title);
+    return;
+  }
+  if(btn.classList.contains('playSaved')){
+    const card=[...document.querySelectorAll('.card')].find(c => (c.querySelector('.cardTitle')?.textContent.trim() || '') === item.title);
+    if(card){ openWatch(card); }
+    else{
+      currentCard = null;
+      watchTitle.textContent=item.title;
+      watchMeta.textContent=item.meta || 'ADLAUI FLEX';
+      watchDesc.textContent=item.description || `Watch ${item.title} on Adlaui Flex.`;
+      poster.style.backgroundImage=`url("${item.image || ''}")`;
+      video.pause(); video.removeAttribute('src'); video.load();
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.classList.add('modalOpen');
+      syncWatchListButton();
+    }
+  }
+});
+
+myListClear.addEventListener('click',()=>{
+  const list=readMyList();
+  if(!list.length) return;
+  if(confirm('Clear all movies from My List?')){
+    writeMyList([]);
+    renderMyList();
+  }
+});
+myListRefresh.addEventListener('click',renderMyList);
+heroMyListBtn.addEventListener('click',()=>{
+  const heroItem={
+    title:'THE NIGHT BEYOND',
+    meta:'2026 • 16+ • 2h 18m • 4K • HDR',
+    description:'A cinematic journey through a city where every secret has a price. Discover powerful stories, unforgettable characters and worlds made to keep you watching.',
+    image:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
+    video:'',
+    savedAt:Date.now()
+  };
+  const list=readMyList();
+  if(!list.some(x=>x.title===heroItem.title)){
+    list.push(heroItem);
+    writeMyList(list);
+  }
+  heroMyListBtn.textContent='✓ In My List';
+  renderMyList();
+  const title=document.getElementById('mylist');
+  if(title) title.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* Keep the My List view correct whenever the tab/page becomes visible again. */
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) renderMyList(); });
+window.addEventListener('storage',renderMyList);
+renderMyList();
+
+/* Make all internal # links scroll instead of jumping to the top */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',(e)=>{
+    const id=a.getAttribute('href');
+    if(id && id!=='#' && document.querySelector(id)){
+      e.preventDefault();
+      document.querySelector(id).scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  });
+});
+</script>
+
+
+
+<!-- Adsterra Native Banner -->
+<div id="adsterra-native-banner" style="width:100%;max-width:1000px;margin:28px auto;padding:0 16px;box-sizing:border-box;">
+  <div id="container-5f7244aae537644196bbdad9979118ea"></div>
+</div>
+<script async="async" data-cfasync="false" src="https://pl31543640.profitableratecpmnetwork.com/5f7244aae537644196bbdad9979118ea/invoke.js"></script>
+
+<!-- Adsterra Social Bar -->
+<script src="https://pl31543638.profitableratecpmnetwork.com/7b/33/99/7b339918ae013f3518a3e2d1b097e63a.js"></script>
+
+
+<!-- Adsterra Ad Unit -->
+<script async="async" data-cfasync="false" src="https://pl31543640.profitableratecpmnetwork.com/5f7244aae537644196bbdad9979118ea/invoke.js"></script>
+<div id="container-5f7244aae537644196bbdad9979118ea"></div>
+
+<!-- Adsterra Popunder_1 -->
+<script src="https://pl31543639.profitableratecpmnetwork.com/a3/1a/08/a31a08a7ff2d2302e21e180602d0e09d.js"></script>
+
+
+<!-- HighRevenueFormat 468x60 Banner -->
+<div class="ad-container high-revenue-banner" style="display:flex;justify-content:center;align-items:center;margin:24px auto;min-height:60px;max-width:468px;overflow:hidden;">
+<script>
+  atOptions = {
+    'key' : '12afe67f0536f91452018336410c43c5',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/12afe67f0536f91452018336410c43c5/invoke.js"></script>
+</div>
+
+<!-- HighRevenueFormat 300x250 Banner placements -->
+<div class="ad-container high-revenue-banner-300" style="display:flex;justify-content:center;align-items:center;margin:28px auto;min-height:250px;width:100%;max-width:300px;overflow:hidden;">
+<script>
+  atOptions = {
+    'key' : '721b1fbd74184bd23d360ca9b0deefe7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/721b1fbd74184bd23d360ca9b0deefe7/invoke.js"></script>
+</div>
+
+<div class="ad-container high-revenue-banner-300" style="display:flex;justify-content:center;align-items:center;margin:28px auto;min-height:250px;width:100%;max-width:300px;overflow:hidden;">
+<script>
+  atOptions = {
+    'key' : '721b1fbd74184bd23d360ca9b0deefe7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/721b1fbd74184bd23d360ca9b0deefe7/invoke.js"></script>
+</div>
+
+<div class="ad-container high-revenue-banner-300" style="display:flex;justify-content:center;align-items:center;margin:28px auto;min-height:250px;width:100%;max-width:300px;overflow:hidden;">
+<script>
+  atOptions = {
+    'key' : '721b1fbd74184bd23d360ca9b0deefe7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/721b1fbd74184bd23d360ca9b0deefe7/invoke.js"></script>
+</div>
+
+<div class="ad-container high-revenue-banner-300" style="display:flex;justify-content:center;align-items:center;margin:28px auto;min-height:250px;width:100%;max-width:300px;overflow:hidden;">
+<script>
+  atOptions = {
+    'key' : '721b1fbd74184bd23d360ca9b0deefe7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/721b1fbd74184bd23d360ca9b0deefe7/invoke.js"></script>
+</div>
+
+</body>
+</html>
